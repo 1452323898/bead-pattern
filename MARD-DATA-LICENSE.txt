@@ -1,6 +1,7 @@
 MARD reference color data
 Source: https://github.com/maxcleme/beadcolors/blob/29229889daab404fb30531d4bb785fd73f7f58e3/raw/mard.csv
-Subset: A-H and M series (221 regular colors).
+Catalogs: A-H and M series (221 regular colors); all 291 reference colors
+including P/Q/R/T/Y/ZG extensions (70 additional colors).
 RGB values are community references, not manufacturer-calibrated measurements.
 
 MIT License

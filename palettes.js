@@ -1,6 +1,7 @@
 /* MARD reference RGB data: maxcleme/beadcolors, MIT.
  * Source: https://github.com/maxcleme/beadcolors/blob/29229889daab404fb30531d4bb785fd73f7f58e3/raw/mard.csv
- * A-H and M series: 221 regular colors. Community references, not manufacturer-calibrated.
+ * 221 regular colors (A-H, M) and 291 reference colors (also P, Q, R, T, Y, ZG).
+ * Community references, not manufacturer-calibrated or a current manufacturer catalog.
  * Copyright (c) 2020 maxcleme. See MARD-DATA-LICENSE.txt.
  */
 (function(root,factory){
@@ -232,5 +233,80 @@
     {"code":"M14","rgb":[199,115,98]},
     {"code":"M15","rgb":[117,125,120]}
   ];
-  return {mard221:{id:'mard221',name:'MARD 221 色',colors}};
+  const extendedColors=[
+    {"code":"P1","rgb":[252,247,248]},
+    {"code":"P2","rgb":[176,169,172]},
+    {"code":"P3","rgb":[175,220,171]},
+    {"code":"P4","rgb":[254,164,159]},
+    {"code":"P5","rgb":[238,140,62]},
+    {"code":"P6","rgb":[95,208,167]},
+    {"code":"P7","rgb":[235,146,112]},
+    {"code":"P8","rgb":[240,217,88]},
+    {"code":"P9","rgb":[217,217,217]},
+    {"code":"P10","rgb":[217,199,234]},
+    {"code":"P11","rgb":[243,236,201]},
+    {"code":"P12","rgb":[230,238,242]},
+    {"code":"P13","rgb":[170,203,239]},
+    {"code":"P14","rgb":[51,118,128]},
+    {"code":"P15","rgb":[102,133,117]},
+    {"code":"P16","rgb":[254,191,69]},
+    {"code":"P17","rgb":[254,163,36]},
+    {"code":"P18","rgb":[254,184,159]},
+    {"code":"P19","rgb":[255,254,236]},
+    {"code":"P20","rgb":[254,190,207]},
+    {"code":"P21","rgb":[236,190,191]},
+    {"code":"P22","rgb":[228,168,159]},
+    {"code":"P23","rgb":[165,98,104]},
+    {"code":"Q1","rgb":[242,165,232]},
+    {"code":"Q2","rgb":[233,236,145]},
+    {"code":"Q3","rgb":[255,255,0]},
+    {"code":"Q4","rgb":[255,235,250]},
+    {"code":"Q5","rgb":[118,206,222]},
+    {"code":"R1","rgb":[213,13,33]},
+    {"code":"R2","rgb":[249,47,131]},
+    {"code":"R3","rgb":[253,131,36]},
+    {"code":"R4","rgb":[248,236,49]},
+    {"code":"R5","rgb":[53,199,91]},
+    {"code":"R6","rgb":[35,136,145]},
+    {"code":"R7","rgb":[25,119,157]},
+    {"code":"R8","rgb":[26,96,195]},
+    {"code":"R9","rgb":[154,86,180]},
+    {"code":"R10","rgb":[255,219,76]},
+    {"code":"R11","rgb":[255,235,250]},
+    {"code":"R12","rgb":[216,213,206]},
+    {"code":"R13","rgb":[85,81,76]},
+    {"code":"R14","rgb":[159,228,223]},
+    {"code":"R15","rgb":[119,206,233]},
+    {"code":"R16","rgb":[62,207,202]},
+    {"code":"R17","rgb":[74,134,122]},
+    {"code":"R18","rgb":[127,205,157]},
+    {"code":"R19","rgb":[205,229,93]},
+    {"code":"R20","rgb":[232,199,180]},
+    {"code":"R21","rgb":[173,111,60]},
+    {"code":"R22","rgb":[108,55,47]},
+    {"code":"R23","rgb":[254,184,114]},
+    {"code":"R24","rgb":[243,193,192]},
+    {"code":"R25","rgb":[201,103,94]},
+    {"code":"R26","rgb":[210,147,190]},
+    {"code":"R27","rgb":[234,140,177]},
+    {"code":"R28","rgb":[156,135,214]},
+    {"code":"T1","rgb":[255,255,255]},
+    {"code":"Y1","rgb":[253,111,180]},
+    {"code":"Y2","rgb":[254,180,129]},
+    {"code":"Y3","rgb":[215,250,160]},
+    {"code":"Y4","rgb":[139,219,250]},
+    {"code":"Y5","rgb":[233,135,234]},
+    {"code":"ZG1","rgb":[218,171,179]},
+    {"code":"ZG2","rgb":[214,170,135]},
+    {"code":"ZG3","rgb":[193,189,141]},
+    {"code":"ZG4","rgb":[150,134,159]},
+    {"code":"ZG5","rgb":[132,144,166]},
+    {"code":"ZG6","rgb":[148,191,226]},
+    {"code":"ZG7","rgb":[226,169,210]},
+    {"code":"ZG8","rgb":[171,145,192]}
+  ];
+  return {
+    mard221:{id:'mard221',name:'MARD 221 色',colors},
+    mard291:{id:'mard291',name:'MARD 291 色',colors:colors.concat(extendedColors)}
+  };
 });

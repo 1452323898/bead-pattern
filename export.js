@@ -2,10 +2,11 @@
   const ink='#293d32';
   const contrast=rgb=>rgb[0]*.299+rgb[1]*.587+rgb[2]*.114>145?'#26382c':'#ffffff';
   function paletteInfo(pattern){
-    const mard=pattern.paletteId==='mard221';
+    const extended=pattern.paletteId==='mard291';
+    const mard=pattern.paletteId==='mard221'||extended;
     return {
-      name:mard?(pattern.paletteName||'MARD 221 色'):(pattern.paletteId==='generic'?(pattern.paletteName||'通用配色'):'通用配色'),
-      note:mard?'MARD 色号来自社区色卡；屏幕与打印颜色仅供参考，实物豆子可能有色差。':'C01 等为本图自定义编号，非品牌色号。对照实物色卡选豆；屏幕与打印颜色可能存在色差。'
+      name:mard?(pattern.paletteName||(extended?'MARD 291 色':'MARD 221 色')):(pattern.paletteId==='generic'?(pattern.paletteName||'通用配色'):'通用配色'),
+      note:extended?'MARD 291 为社区扩展色卡，含特殊豆；请按实物选豆，透明／珠光等材质仅以参考颜色预览。':mard?'MARD 色号来自社区色卡；屏幕与打印颜色仅供参考，实物豆子可能有色差。':'C01 等为本图自定义编号，非品牌色号。对照实物色卡选豆；屏幕与打印颜色可能存在色差。'
     };
   }
   function drawGrid(canvas,pattern,{cell=24,labels=true,beads=false,ironed=false,floating=true,tile=null}={}) {
