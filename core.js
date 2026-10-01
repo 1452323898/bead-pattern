@@ -84,6 +84,112 @@
     }
     return centers.map(fromOklab);
   }
+  function constrainedColors(entries,catalog,maxColors,projectedColors) {
+    // Optimize the colors that can actually be bought. Snapping independently
+    // quantized centers to a bead catalog can collapse several useful shades.
+    // Equal reference RGB values always keep the first manufacturer's code.
+    const seen=new Set(),candidates=[];
+    for(const color of catalog.colors) {
+      const key=color.rgb.join(',');
+      if(seen.has(key))continue;
+      seen.add(key);candidates.push({...color,lab:toOklab(color.rgb)});
+    }
+    const count=entries.length,distances=[],nearest=new Uint32Array(count);
+    const lower=new Float64Array(count).fill(Infinity);
+    for(let c=0;c<candidates.length;c++) {
+      // At the maximum grid and MARD 291 this cache uses less than 23 MB.
+      // Full-precision comparisons below choose the final result and exact ties.
+      const row=new Float32Array(count);
+      for(let i=0;i<count;i++) {
+        const d=labDistance(entries[i].lab,candidates[c].lab);
+        row[i]=d;
+        if(d<lower[i]){lower[i]=d;nearest[i]=c;}
+      }
+      distances.push(row);
+    }
+    const needed=Array.from(new Set(nearest));
+    function result(indices) {
+      return indices.slice().sort((a,b)=>a-b).map(i=>{
+        const c=candidates[i];return {code:c.code,rgb:c.rgb.slice(),hex:hex(c.rgb)};
+      });
+    }
+    // No reduction is necessary when every source color's closest real bead
+    // fits the budget, even if the source contains thousands of unique RGBs.
+    if(needed.length<=maxColors)return result(needed);
+    function closest(lab) {
+      let best=Infinity,id=0;
+      for(let c=0;c<candidates.length;c++) {
+        const d=labDistance(lab,candidates[c].lab);
+        if(d<best){best=d;id=c;}
+      }
+      return id;
+    }
+    function score(indices) {
+      let sum=0;
+      for(const entry of entries) {
+        let best=Infinity;
+        for(const c of indices)best=Math.min(best,labDistance(entry.lab,candidates[c].lab));
+        sum+=entry.weight*best;
+      }
+      return sum;
+    }
+    function fill(initial) {
+      const indices=Array.from(new Set(initial)),selected=new Uint8Array(candidates.length);
+      const errors=new Float64Array(count).fill(Infinity);
+      for(const c of indices) {
+        selected[c]=1;
+        for(let i=0;i<count;i++)errors[i]=Math.min(errors[i],distances[c][i]);
+      }
+      if(!indices.length) {
+        let first=0,best=Infinity;
+        for(let c=0;c<candidates.length;c++) {
+          let sum=0;
+          for(let i=0;i<count;i++)sum+=entries[i].weight*distances[c][i];
+          if(sum<best){best=sum;first=c;}
+        }
+        indices.push(first);selected[first]=1;errors.set(distances[first]);
+      }
+      while(indices.length<maxColors) {
+        let next=-1,gain=0;
+        for(let c=0;c<candidates.length;c++) {
+          if(selected[c])continue;
+          let improvement=0;
+          const row=distances[c];
+          for(let i=0;i<count;i++)if(row[i]<errors[i])improvement+=entries[i].weight*(errors[i]-row[i]);
+          if(improvement>gain){gain=improvement;next=c;}
+        }
+        if(next<0||gain<=1e-12)break;
+        indices.push(next);selected[next]=1;
+        for(let i=0;i<count;i++)errors[i]=Math.min(errors[i],distances[next][i]);
+      }
+      return indices;
+    }
+    let chosen=fill([]),bestScore=score(chosen);
+    // A bounded constrained Lloyd pass relocates a greedy starter color that
+    // became redundant after more colors were added. Refill collapsed slots.
+    for(let round=0;round<2;round++) {
+      const sums=chosen.map(()=>[0,0,0,0]);
+      for(let i=0;i<count;i++) {
+        let id=0,best=Infinity;
+        for(let j=0;j<chosen.length;j++) {
+          const d=labDistance(entries[i].lab,candidates[chosen[j]].lab);
+          if(d<best){best=d;id=j;}
+        }
+        const sum=sums[id],entry=entries[i];
+        for(let c=0;c<3;c++)sum[c]+=entry.lab[c]*entry.weight;
+        sum[3]+=entry.weight;
+      }
+      const next=fill(sums.filter(sum=>sum[3]>0).map(sum=>closest(sum.slice(0,3).map(n=>n/sum[3]))));
+      const nextScore=score(next);
+      if(nextScore>=bestScore-1e-12)break;
+      chosen=next;bestScore=nextScore;
+    }
+    // Greedy selection is not globally optimal. Preserve the previous solution
+    // if it has lower total error, while filling any slots lost to its snapping.
+    const baseline=Array.from(new Set(projectedColors.map(rgb=>closest(toOklab(rgb)))));
+    if(score(baseline)<bestScore)chosen=fill(baseline);
+    return result(chosen);
+  }
   function quantize(data,width,height,{maxColors=16,transparent=true,catalog=null,quality='legacy'}={}) {
     if (!Number.isInteger(width)||!Number.isInteger(height)||width<1||height<1||width*height>19200||data.length!==width*height*4) throw new RangeError('像素数据或图纸尺寸无效');
     if (!Number.isInteger(maxColors)||maxColors<1||maxColors>64) throw new RangeError('颜色数量无效');
@@ -93,7 +199,9 @@
     for(let i=0;i<data.length;i+=4) {
       const alpha=data[i+3];
       if(transparent && alpha<128) {pixels.push(null); continue;}
-      const rgb=[0,1,2].map(k=>Math.round((data[i+k]*alpha+255*(255-alpha))/255));
+      // A bead is opaque: retained transparent-image pixels use their own RGB.
+      // White compositing is only appropriate when a white background is wanted.
+      const rgb=[0,1,2].map(k=>transparent?data[i+k]:Math.round((data[i+k]*alpha+255*(255-alpha))/255));
       const key=rgb[0]*65536+rgb[1]*256+rgb[2];
       pixels.push(rgb);
       if(histogram.has(key)) histogram.get(key).weight++;
@@ -129,7 +237,8 @@
     }
     let selected=colors.map(rgb=>({rgb,hex:hex(rgb)}));
     const catalogValues=perceptual&&catalog?catalog.colors.map(c=>toOklab(c.rgb)):null;
-    if(catalog) selected=colors.map(rgb=>{
+    if(catalog&&perceptual)selected=constrainedColors(entries,catalog,maxColors,colors);
+    else if(catalog) selected=colors.map(rgb=>{
       let nearest=catalog.colors[0],best=Infinity;
       const value=perceptual?toOklab(rgb):rgb;
       for(let i=0;i<catalog.colors.length;i++){

@@ -42,7 +42,9 @@
     ctx.lineWidth=.65;ctx.strokeStyle='rgba(50,35,25,.075)';ctx.stroke(seams);
     const grain=texture();ctx.fillStyle=ctx.createPattern(grain,'repeat');ctx.fillRect(0,0,face.width,face.height);grain.width=1;
     const lightFall=ctx.createLinearGradient(0,0,face.width,face.height);
-    lightFall.addColorStop(0,'rgba(255,255,255,.12)');lightFall.addColorStop(.55,'rgba(255,255,255,0)');lightFall.addColorStop(1,'rgba(32,24,16,.09)');ctx.fillStyle=lightFall;ctx.fillRect(0,0,face.width,face.height);
+    // Keep face lighting neutral and subtle; edge highlights and the cast
+    // shadow provide depth without washing out the reference bead colors.
+    lightFall.addColorStop(0,'rgba(255,255,255,.016)');lightFall.addColorStop(.55,'rgba(255,255,255,0)');lightFall.addColorStop(1,'rgba(0,0,0,.014)');ctx.fillStyle=lightFall;ctx.fillRect(0,0,face.width,face.height);
     ctx.lineWidth=Math.max(.8,cell*.045);ctx.lineCap='round';ctx.strokeStyle='rgba(255,255,255,.4)';ctx.stroke(light);ctx.strokeStyle='rgba(35,26,16,.22)';ctx.stroke(dark);ctx.globalCompositeOperation='source-over';
     const side=makeCanvas(face.width,face.height),sideCtx=side.getContext('2d');sideCtx.drawImage(face,0,0);sideCtx.globalCompositeOperation='source-atop';sideCtx.fillStyle='rgba(27,24,22,.35)';sideCtx.fillRect(0,0,side.width,side.height);
     cached={pattern,cell,face,side};return cached;
@@ -57,6 +59,7 @@
     const depth=Math.max(2,Math.round(m.cell*.13));
     const margin=Math.ceil(Math.max(12,maxLift+blur*3+depth+4));
     canvas.width=Math.ceil(width+margin*2);canvas.height=Math.ceil(height+margin*2+depth);
+    canvas.beadGeometry={width:canvas.width,height:canvas.height,cell:m.cell,originX:margin-minX,originY:margin-minY};
     const ctx=canvas.getContext('2d');
     const background=ctx.createRadialGradient(canvas.width*.35,canvas.height*.26,0,canvas.width*.5,canvas.height*.5,Math.max(canvas.width,canvas.height)*.72);
     background.addColorStop(0,'#ffffff');background.addColorStop(.7,'#f5f3ee');background.addColorStop(1,'#eae7df');ctx.fillStyle=background;ctx.fillRect(0,0,canvas.width,canvas.height);

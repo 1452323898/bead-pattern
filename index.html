@@ -8,7 +8,7 @@
   <title>拼豆图纸生成器｜免费图片转拼豆图纸</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23274738'/%3E%3Cpath fill='%23ffaf66' d='M6 6h9v9H6zm11 0h9v9h-9zM6 17h9v9H6z'/%3E%3Ccircle cx='21.5' cy='21.5' r='4.5' fill='%23fff'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
-  <script src="palettes.js" defer></script><script src="core.js" defer></script><script src="sampling.js" defer></script><script src="finish.js" defer></script><script src="export.js" defer></script><script src="app.js" defer></script>
+  <script src="palettes.js" defer></script><script src="core.js" defer></script><script src="sampling.js" defer></script><script src="finish.js" defer></script><script src="export.js" defer></script><script src="size-reference.js" defer></script><script src="app.js" defer></script>
   <script src="analytics.js" defer></script>
 </head>
 <body>
@@ -20,7 +20,7 @@
   <main>
     <div class="intro"><div><div class="eyebrow">MAKE SOMETHING WITH YOUR HANDS</div><h1>把图片，变成拼豆图纸<span>。</span></h1><p>选一张喜欢的图片，剩下的交给格子与颜色。</p></div><div class="intro-label"><span>01</span> 上传图片<i></i><span>02</span> 调整图纸<i></i><span>03</span> 开始拼豆</div></div>
     <section class="analytics-notice" id="analytics-notice" aria-labelledby="analytics-title" hidden>
-      <div><strong id="analytics-title">帮助了解网站的使用情况</strong><p>允许百度统计记录访问量和来源吗？同意后会使用 Cookie，并向百度发送访问记录及浏览器等信息。图片生成仍在本机完成，拒绝也能正常使用。详见<a href="https://tongji.baidu.com/web/help/article?id=330&amp;type=0" target="_blank" rel="noopener noreferrer">百度统计隐私政策</a>，可随时在页脚修改选择。</p><span id="analytics-status" role="status"></span></div>
+      <div><strong id="analytics-title">愿意参与访问统计吗？</strong><p>我只是想看看有多少人访问这个免费小工具，作为继续完善它的参考。无需登录本站，也不用提供姓名、手机号；本站不会把你选取的图片或生成的图纸作为统计数据发送。</p><p>同意后，百度统计会使用 Cookie，并处理访问页面、来源、IP 地址及浏览器等基本访问信息，详见<a href="https://tongji.baidu.com/web/help/article?id=330&amp;type=0" target="_blank" rel="noopener noreferrer">百度统计隐私政策</a>。不参与也能正常使用全部功能，可随时在页脚修改选择、关闭后续统计。</p><span id="analytics-status" role="status"></span></div>
       <div class="analytics-actions"><button type="button" id="analytics-decline" class="outline-btn">不参与统计</button><button type="button" id="analytics-accept" class="primary-btn">同意统计</button></div>
     </section>
     <div class="workspace">
@@ -51,7 +51,7 @@
                 <li><strong>回到这里，上传透明 PNG</strong><p>勾选“透明区域不放豆子”。如果背景也生成了豆子，请回到抠图工具检查透明背景；不要通过截图保存，也不要导出成 JPG。</p></li>
               </ol>
               <p class="guide-tip"><strong>先检查，再做图纸</strong> 放大看看头发、手指、配饰和镂空处。PNG 也可能带白底；真正透明的区域导入本站后不会放豆子。</p>
-              <p class="guide-disclosure">本站只提供官网入口，不代传图片、不调用付费接口。外部工具需要联网，可能需要登录；免费额度与导出尺寸以对方当前页面为准，访问速度因网络而异。</p>
+              <p class="guide-disclosure"><strong>非广告分享，请谨慎付费。</strong>我没有收取推广费或佣金，也不从你的使用或付费中获利。本站只提供官网入口，不代传图片、不调用付费接口。外部工具需联网、可能需登录，免费额度、收费项目和隐私规则由对方决定。遇到充值、会员或付费下载，请先确认价格和用途；也可以直接退出，换用其他工具。</p>
             </div>
           </details>
           <details class="cutout-guide">
@@ -79,7 +79,7 @@
                 <li><strong>回到这里，上传并生成图纸</strong><p>勾选“透明区域不放豆子”。如果白底或棋盘格也变成豆子，说明背景仍画在图片里，需要重新抠图。</p></li>
               </ol>
               <p class="guide-tip"><strong>PNG 文件不一定透明</strong> 提示词不能保证 AI 完全不改图，也不能让所有模式都支持透明背景。若只得到文字答复、白底或棋盘格图片，请改用专门的“抠图 / 去背景”功能，或换一个平台，重新检查后再下载。</p>
-              <p class="guide-disclosure">外部工具需联网、可能需要登录，图片由你自行上传给所选平台，本站不会代传或调用付费接口。免费次数、积分和功能以对方当前页面为准，不承诺永久免费或不限量；本教程只建议使用当前可用的免费功能，无需为本站购买会员。</p>
+              <p class="guide-disclosure"><strong>非广告分享，请谨慎付费。</strong>我没有收取推广费或佣金，也不从你的使用或付费中获利。外部工具需联网、可能需登录，图片由你自行上传给所选平台，本站不会代传或调用付费接口。免费额度、收费项目和隐私规则由对方决定，不承诺永久免费或不限量。遇到充值、会员或付费下载，请先确认价格和用途；也可以退出换用其他工具，无需为本站购买会员。</p>
             </div>
           </details>
         </section>
@@ -88,7 +88,7 @@
           <div class="field"><label for="columns">横向格数 <output id="columns-value" for="columns">48 <small>格</small></output></label><input type="range" id="columns" min="16" max="120" step="1" value="48"><div class="range-meta"><span>少一点，更好拼</span><span>多一点，更细腻</span></div></div>
           <div class="presets" aria-label="格数快捷设置"><button data-columns="29">29 格</button><button class="active" data-columns="48">48 格</button><button data-columns="72">72 格</button><button data-columns="96">96 格</button></div>
           <div class="field"><label for="colors">最多颜色 <output id="colors-value" for="colors">16 <small>色</small></output></label><input type="range" id="colors" min="4" max="32" value="16"><div class="range-meta"><span>颜色精简</span><span>还原细节</span></div></div>
-          <div class="field"><label for="sampling">图片类型</label><select id="sampling" aria-describedby="sampling-note"><option value="photo">照片 / 渐变 · 自然过渡</option><option value="illustration">插画 / 动漫 · 清晰色块</option><option value="lineart">细线稿 / 表情包 · 保留线条</option><option value="pixel">像素画 · 保持原色块</option></select><p class="privacy-note" id="sampling-note">适合人像、风景和有明暗渐变的图片，柔和缩小并优化配色。</p></div>
+          <div class="field"><label for="sampling">图片类型</label><select id="sampling" aria-describedby="sampling-note"><option value="photo">照片 / 渐变 · 自然过渡</option><option value="illustration">插画 / 动漫 · 清晰色块</option><option value="lineart">细线稿 / 表情包 · 保留线条</option><option value="pixel">像素画 · 保持原色块</option></select><p class="privacy-note" id="sampling-note">适合人像、风景和明暗渐变，柔和缩小并保留色调。肤色与衣服层次多时，可尝试 24–32 色。</p></div>
           <div class="field" id="detail-field" hidden><label for="detail-strength">线条保留 <output id="detail-value" for="detail-strength">70 <small>%</small></output></label><input type="range" id="detail-strength" min="0" max="100" step="5" value="70" aria-describedby="detail-note" disabled><div class="range-meta"><span>柔和</span><span>清晰</span></div><p class="privacy-note" id="detail-note">太粗或出现杂线时调低。细节仍丢失时，先裁掉多余背景，或试试 72 / 96 格。</p></div>
           <label class="check-row"><input id="transparent" type="checkbox" checked><span>透明区域不放豆子<small>有透明背景的 PNG / WebP 适用</small></span></label>
           <button id="generate-btn" class="primary-btn" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M17.5 13v9M13 17.5h9"/></svg><span>生成拼豆图纸</span></button>
@@ -97,6 +97,17 @@
       </aside>
       <section class="preview-panel panel" aria-label="图纸预览">
         <div class="preview-toolbar"><div class="view-tabs" role="group" aria-label="预览模式"><button class="active" data-view="pattern" aria-pressed="true">拼豆图纸</button><button data-view="beads" aria-pressed="false">拼豆效果</button><button data-view="ironed" aria-pressed="false">成品效果</button><button data-view="original" aria-pressed="false">图片预览</button></div><span class="paper-tag">你的创作画布</span></div>
+        <section class="physical-size-panel" id="physical-size-panel" aria-labelledby="physical-size-title" hidden>
+          <div class="physical-size-heading"><span id="physical-size-title">主体预计尺寸 <small>宽 × 高</small></span><strong id="physical-size-value" aria-live="polite"></strong></div>
+          <div class="size-options">
+            <label for="bead-pitch">豆子规格 / 格距<select id="bead-pitch" aria-describedby="physical-size-note"><option value="2.6">小豆 · 2.6 毫米</option><option value="5">大豆 · 5 毫米</option><option value="custom">自定义格距</option></select></label>
+            <label for="custom-pitch" id="custom-pitch-field" hidden>自定义（毫米）<input id="custom-pitch" type="number" min="1" max="10" step="0.1" value="2.6" inputmode="decimal" aria-describedby="pitch-error physical-size-note"></label>
+            <label for="size-reference">等比例参照<select id="size-reference" aria-describedby="reference-note"><option value="coin">硬币</option><option value="phone">手机</option><option value="both">硬币 + 手机</option><option value="none">不显示</option></select></label>
+          </div>
+          <p class="pitch-error" id="pitch-error" role="status" hidden>请输入 1–10 毫米的格距（最多一位小数）；暂按上次有效值计算。</p>
+          <p id="physical-size-note" class="size-note"></p>
+          <p id="reference-note" class="size-note">示意硬币直径 2.5 cm，与图案等比例缩放；屏幕显示并非实物 1:1。</p>
+        </section>
         <div class="finish-controls" id="finish-controls" hidden>
           <div class="finish-heading"><span>普通烫成品</span><label><input id="floating-shadow" type="checkbox" checked>悬浮投影</label></div>
         </div>
@@ -105,9 +116,12 @@
           <div class="canvas-content" id="canvas-content" hidden>
             <canvas id="preview" hidden aria-label="生成的拼豆图纸，详细颜色数量见用色清单"></canvas>
             <img id="original-preview" hidden alt="当前用于生成图纸的图片，灰白格代表透明背景">
+            <div id="reference-coin" class="size-object" role="img" aria-label="示意硬币，直径 2.5 厘米，与图案等比例" hidden><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="49.5" fill="#d8c7a5" stroke="#93836a"/><circle cx="50" cy="50" r="43" fill="#ecdfc7" stroke="#b5a384" stroke-width="1.2"/><circle cx="50" cy="50" r="37" fill="none" stroke="#c9b793" stroke-dasharray="1 4"/><path d="M50 28 55 44 72 50 55 56 50 72 45 56 28 50 45 44Z" fill="#b39e78"/><path d="M17 43A34 34 0 0 1 43 17" fill="none" stroke="#fff9ed" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <div id="reference-phone" class="size-object" role="img" aria-label="示意手机，宽 7 厘米、高 15 厘米，与图案等比例" hidden><svg viewBox="0 0 70 150" aria-hidden="true"><rect x=".5" y=".5" width="69" height="149" rx="9" fill="#626f68" stroke="#3c4c42"/><rect x="3" y="3" width="64" height="144" rx="7" fill="#dce4de"/><rect x="24" y="6" width="22" height="4" rx="2" fill="#626f68"/><path d="M10 100 60 50M10 111 60 61" stroke="#eef3ee" stroke-width="1.5"/><rect x="24" y="140" width="22" height="1.5" rx=".75" fill="#8c9c90"/></svg></div>
           </div>
         </div>
-        <p class="preview-note" id="ironed-note" hidden><strong>滚轮缩放 · 左键按住拖动 · 点击“适应”复位</strong><br>成品外观模拟；实际纹理、颜色及孔洞随材料和烫法而异。</p>
+        <p class="preview-note gesture-note" id="gesture-note" hidden><strong class="mouse-help">滚轮缩放 · 左键按住拖动 · 点击“适应”复位</strong><strong class="touch-help">双指捏合缩放 · 单指按住拖动放大后的图案<br>从画布外滑动页面；点击“适应”复位。</strong></p>
+        <p class="preview-note" id="ironed-note" hidden>成品外观模拟；实际纹理、颜色及孔洞随材料和烫法而异。</p>
         <div class="canvas-footer"><label class="check-inline"><input id="show-labels" type="checkbox" checked>显示编号</label><span id="grid-meta">等待上传图片</span><div class="zoom-controls"><button id="zoom-out" aria-label="缩小图纸" disabled>−</button><button id="zoom-fit" disabled>适应</button><button id="zoom-in" aria-label="放大图纸" disabled>＋</button></div></div>
         <div class="status-bar" id="status" role="status" aria-live="polite">准备好了吗？从一张喜欢的图片开始。</div>
       </section>
@@ -118,7 +132,8 @@
         <div class="export-actions"><button id="download-btn" class="primary-btn" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 15v5h16v-5"/></svg>下载图纸 PNG</button><button id="print-btn" class="outline-btn" disabled>打印 / 保存为 PDF</button><small>导出包含编号、坐标和用色清单</small></div>
       </aside>
     </div>
-    <footer class="page-footer"><span>一格一颗，慢慢来，也很好。</span><span>图片本机处理 · 图纸生成可离线<br>公开网站可选百度访问统计 <button type="button" id="analytics-settings" hidden>访问统计设置</button></span></footer>
+    <section class="sharing-note" aria-labelledby="sharing-title"><h2 id="sharing-title">个人学习 · 自用 · 免费分享</h2><p>这是我为学习和自用制作的小工具，现在免费分享给大家。抠图和 AI 平台链接仅供参考，不是广告；我没有收取推广费或佣金。</p><p>外部平台的免费额度与收费规则可能变化。遇到充值、会员或付费下载时请谨慎，先确认价格和用途；无需为使用本站购买任何会员。</p></section>
+    <footer class="page-footer"><span>一格一颗，慢慢来，也很好。</span><span>图片本机处理 · 图纸生成可离线<br>自愿参与百度访问统计，帮我了解使用情况 <button type="button" id="analytics-settings" hidden>访问统计设置</button></span></footer>
   </main>
   <div id="print-root"></div>
 </body>

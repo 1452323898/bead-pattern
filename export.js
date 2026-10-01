@@ -13,6 +13,7 @@
     if(ironed)return BeadFinish.draw(canvas,pattern,{floating});
     const part=tile||{x:0,y:0,width:pattern.width,height:pattern.height};
     const margin=36;canvas.width=part.width*cell+margin*2;canvas.height=part.height*cell+margin*2;
+    canvas.beadGeometry={width:canvas.width,height:canvas.height,cell,originX:margin,originY:margin};
     const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
     for(let y=0;y<part.height;y++)for(let x=0;x<part.width;x++){
       const id=pattern.cells[(part.y+y)*pattern.width+part.x+x],px=margin+x*cell,py=margin+y*cell;
