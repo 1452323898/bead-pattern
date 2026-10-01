@@ -1,6 +1,13 @@
 (function(){'use strict';
   const ink='#293d32';
   const contrast=rgb=>rgb[0]*.299+rgb[1]*.587+rgb[2]*.114>145?'#26382c':'#ffffff';
+  function paletteInfo(pattern){
+    const mard=pattern.paletteId==='mard221';
+    return {
+      name:mard?(pattern.paletteName||'MARD 221 色'):(pattern.paletteId==='generic'?(pattern.paletteName||'通用配色'):'通用配色'),
+      note:mard?'MARD 色号来自社区色卡；屏幕与打印颜色仅供参考，实物豆子可能有色差。':'C01 等为本图自定义编号，非品牌色号。对照实物色卡选豆；屏幕与打印颜色可能存在色差。'
+    };
+  }
   function drawGrid(canvas,pattern,{cell=24,labels=true,beads=false,ironed=false,floating=true,tile=null}={}) {
     if(ironed)return BeadFinish.draw(canvas,pattern,{floating});
     const part=tile||{x:0,y:0,width:pattern.width,height:pattern.height};
@@ -20,6 +27,7 @@
     return canvas;
   }
   function drawSheet(pattern,name) {
+    const palette=paletteInfo(pattern);
     const grid=drawGrid(document.createElement('canvas'),pattern,{cell:24,labels:true});
     const sheet=document.createElement('canvas');sheet.width=Math.max(840,grid.width+64);
     const cols=Math.max(2,Math.floor((sheet.width-64)/250));
@@ -29,9 +37,9 @@
     ctx.fillStyle=ink;ctx.font='bold 28px sans-serif';ctx.fillText('拼豆图纸生成器 · '+name.slice(0,35),32,45,sheet.width-64);
     ctx.font='16px sans-serif';ctx.fillText(`${pattern.width} × ${pattern.height} 格  /  ${pattern.total.toLocaleString('zh-CN')} 颗豆子  /  ${pattern.palette.length} 种颜色`,32,76);
     ctx.drawImage(grid,(sheet.width-grid.width)/2,100);
-    const top=grid.height+132;ctx.font='bold 18px sans-serif';ctx.fillText('用色清单 · 每格 1 颗豆子',32,top);
+    const top=grid.height+132;ctx.font='bold 18px sans-serif';ctx.fillText(`用色清单 · ${palette.name} · 每格 1 颗豆子`,32,top);
     pattern.palette.forEach((color,i)=>{const x=32+(i%cols)*(sheet.width-64)/cols,y=top+22+Math.floor(i/cols)*50;ctx.fillStyle=color.hex;ctx.fillRect(x,y,29,29);ctx.strokeStyle='#bec9c0';ctx.strokeRect(x,y,29,29);ctx.fillStyle=ink;ctx.font='bold 15px sans-serif';ctx.fillText(`${color.code}  ${color.count.toLocaleString('zh-CN')} 颗`,x+40,y+13);ctx.fillStyle='#68786b';ctx.font='12px monospace';ctx.fillText(color.hex.toUpperCase(),x+40,y+30);});
-    ctx.fillStyle='#68786b';ctx.font='13px sans-serif';ctx.fillText('C01 等为本图自定义编号，非品牌色号。对照实物色卡选豆；屏幕与打印颜色可能存在色差。',32,sheet.height-26,sheet.width-64);
+    ctx.fillStyle='#68786b';ctx.font='13px sans-serif';ctx.fillText(palette.note,32,sheet.height-26,sheet.width-64);
     return sheet;
   }
   function download(pattern,name,status){
@@ -41,11 +49,12 @@
   }
   async function print(pattern,name,status){
     if(!pattern||!pattern.total)return;
+    const palette=paletteInfo(pattern);
     const root=document.getElementById('print-root');root.replaceChildren();
     const page=document.createElement('section');page.className='print-page';
     const title=document.createElement('h1');title.textContent=name+' · 拼豆图纸';
-    const summary=document.createElement('p');summary.textContent=`${pattern.width} × ${pattern.height} 格 · ${pattern.total.toLocaleString('zh-CN')} 颗豆子 · ${pattern.palette.length} 种颜色。每格 1 颗豆子，透明格留空。`;
-    const note=document.createElement('p');note.textContent='C01 等为本图自定义编号，非品牌色号。请对照实物色卡选豆。后续页面按最多 40 列 × 50 行分块，按全图行列坐标衔接；图纸并非实体拼豆的 1:1 尺寸。打印彩色图例时请启用“背景图形”。';
+    const summary=document.createElement('p');summary.textContent=`${pattern.width} × ${pattern.height} 格 · ${pattern.total.toLocaleString('zh-CN')} 颗豆子 · ${pattern.palette.length} 种颜色 · ${palette.name}。每格 1 颗豆子，透明格留空。`;
+    const note=document.createElement('p');note.textContent=palette.note+'后续页面按最多 40 列 × 50 行分块，按全图行列坐标衔接；图纸并非实体拼豆的 1:1 尺寸。打印彩色图例时请启用“背景图形”。';
     const list=document.createElement('div');list.className='print-colors';
     for(const c of pattern.palette){const item=document.createElement('div');const swatch=document.createElement('i');swatch.style.background=c.hex;const label=document.createElement('span');label.textContent=`${c.code} · ${c.count} 颗 (${c.hex})`;item.append(swatch,label);list.append(item);}page.append(title,summary,note,list);root.append(page);
     const parts=BeadCore.tiles(pattern.width,pattern.height);const images=[];

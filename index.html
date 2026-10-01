@@ -8,7 +8,7 @@
   <title>拼豆图纸生成器｜免费图片转拼豆图纸</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23274738'/%3E%3Cpath fill='%23ffaf66' d='M6 6h9v9H6zm11 0h9v9h-9zM6 17h9v9H6z'/%3E%3Ccircle cx='21.5' cy='21.5' r='4.5' fill='%23fff'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
-  <script src="core.js" defer></script><script src="finish.js" defer></script><script src="export.js" defer></script><script src="app.js" defer></script>
+  <script src="palettes.js" defer></script><script src="core.js" defer></script><script src="finish.js" defer></script><script src="export.js" defer></script><script src="app.js" defer></script>
 </head>
 <body>
   <header class="site-header">
@@ -44,6 +44,7 @@
           </details>
         </section>
         <section class="control-section"><h2><span class="step">02</span>调整图纸</h2>
+          <div class="field"><label for="palette">拼豆色卡</label><select id="palette" aria-describedby="palette-note"><option value="mard221" selected>MARD · 221 色常规色卡</option><option value="generic">通用配色 · 自定义编号</option></select></div>
           <div class="field"><label for="columns">横向格数 <output id="columns-value" for="columns">48 <small>格</small></output></label><input type="range" id="columns" min="16" max="120" step="1" value="48"><div class="range-meta"><span>少一点，更好拼</span><span>多一点，更细腻</span></div></div>
           <div class="presets" aria-label="格数快捷设置"><button data-columns="29">29 格</button><button class="active" data-columns="48">48 格</button><button data-columns="72">72 格</button><button data-columns="96">96 格</button></div>
           <div class="field"><label for="colors">最多颜色 <output id="colors-value" for="colors">16 <small>色</small></output></label><input type="range" id="colors" min="4" max="32" value="16"><div class="range-meta"><span>颜色精简</span><span>还原细节</span></div></div>
@@ -72,7 +73,7 @@
       <aside class="palette-panel panel"><div class="palette-heading"><h2>用色清单</h2><span id="palette-badge">0 色</span></div><p class="palette-subtitle">照着编号，准备你的豆子。</p>
         <div class="stats"><div><strong id="bead-total">—</strong><span>颗豆子</span></div><div><strong id="pattern-size">—</strong><span>格 × 格</span></div></div>
         <div class="palette-list" id="palette-list"><div class="palette-empty"><span aria-hidden="true">◌</span><p>图纸生成后<br>每种颜色的用量会出现在这里</p></div></div>
-        <div class="palette-warning"><strong>关于颜色编号</strong><p>C01 等为本图自定义编号，并非品牌色号。请对照实物色卡选豆，屏幕颜色仅供参考。</p></div>
+        <div class="palette-warning"><strong>关于颜色编号</strong><p id="palette-note">使用 MARD 221 色常规色号。屏幕色值来自社区参考色卡，请对照实物选豆；屏幕、打印与实物可能有色差。</p></div>
         <div class="export-actions"><button id="download-btn" class="primary-btn" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 15v5h16v-5"/></svg>下载图纸 PNG</button><button id="print-btn" class="outline-btn" disabled>打印 / 保存为 PDF</button><small>导出包含编号、坐标和用色清单</small></div>
       </aside>
     </div>
