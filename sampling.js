@@ -5,6 +5,35 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
   const directions=[[1,0],[0,1],[1,1],[1,-1]];
+  const bins=4096;
+
+  // Join nearby tones across a histogram boundary before choosing a flat fill.
+  // A small amount of image compression/noise must not split one purple fill
+  // into several bins and let a minority beige background replace its color.
+  function dominantFlat(keys,stamp,stamps,weights,red,green,blue){
+    const seeds=[];
+    for(const key of keys){
+      let at=0;
+      while(at<seeds.length&&weights[seeds[at]]>=weights[key])at++;
+      if(at<4){seeds.splice(at,0,key);if(seeds.length>4)seeds.pop();}
+    }
+    let best=null;
+    for(const seed of seeds){
+      const sr=red[seed]/weights[seed],sg=green[seed]/weights[seed],sb=blue[seed]/weights[seed];
+      const kr=seed>>8,kg=(seed>>4)&15,kb=seed&15;
+      let weight=0,r=0,g=0,b=0;
+      for(let dr=-1;dr<=1;dr++)for(let dg=-1;dg<=1;dg++)for(let db=-1;db<=1;db++){
+        if(kr+dr<0||kr+dr>15||kg+dg<0||kg+dg>15||kb+db<0||kb+db>15)continue;
+        const key=(kr+dr)*256+(kg+dg)*16+kb+db;
+        if(stamps[key]!==stamp)continue;
+        const w=weights[key],rr=red[key]/w,gg=green[key]/w,bb=blue[key]/w;
+        if((rr-sr)**2+(gg-sg)**2+(bb-sb)**2>18*18)continue;
+        weight+=w;r+=red[key];g+=green[key];b+=blue[key];
+      }
+      if(!best||weight>best.weight)best={weight,r:r/weight,g:g/weight,b:b/weight};
+    }
+    return best;
+  }
 
   // Opposite, similar neighbors identify narrow strokes; a broad color edge
   // has one neighbor like the center and is deliberately left alone.
@@ -70,11 +99,13 @@
     const stamps=new Uint32Array(512),weights=new Float64Array(512),alpha=new Float64Array(512);
     const red=new Float64Array(512),green=new Float64Array(512),blue=new Float64Array(512);
     const minX=new Int32Array(512),maxX=new Int32Array(512),minY=new Int32Array(512),maxY=new Int32Array(512);
-    const flatStamps=new Uint32Array(512),flatWeights=new Float64Array(512),flatR=new Float64Array(512),flatG=new Float64Array(512),flatB=new Float64Array(512);
+    const flatStamps=new Uint32Array(bins),flatWeights=new Float64Array(bins),flatR=new Float64Array(bins),flatG=new Float64Array(bins),flatB=new Float64Array(bins);
+    const preserve=Math.min(1,detail/60);
     for(let y=0;y<height;y++)for(let x=0;x<width;x++){
       const x0=x*sx,x1=(x+1)*sx,y0=y*sy,y1=(y+1)*sy;
       const cell=y*width+x,stamp=cell+1,area=sx*sy;
-      let sumA=0,sumR=0,sumG=0,sumB=0,best=-1,flat=-1,totalRidge=0;
+      let sumA=0,sumR=0,sumG=0,sumB=0,best=-1,totalRidge=0;
+      const flatKeys=[];
       for(let py=Math.floor(y0);py<Math.min(sourceHeight,Math.ceil(y1));py++){
         const wy=Math.min(y1,py+1)-Math.max(y0,py);
         for(let px=Math.floor(x0);px<Math.min(sourceWidth,Math.ceil(x1));px++){
@@ -85,13 +116,15 @@
           const b=transparent?data[i+2]:data[i+2]*originalA+255*(1-originalA);
           sumA+=aw;sumR+=r*aw;sumG+=g*aw;sumB+=b*aw;
           if(!enhanced||!aw)continue;
-          const key=(r>>5)*64+(g>>5)*8+(b>>5);
           if(mode==='illustration'){
-            if(flatStamps[key]!==stamp){flatStamps[key]=stamp;flatWeights[key]=flatR[key]=flatG[key]=flatB[key]=0;}
+            const key=(r>>4)*256+(g>>4)*16+(b>>4);
+            if(flatStamps[key]!==stamp){flatStamps[key]=stamp;flatWeights[key]=flatR[key]=flatG[key]=flatB[key]=0;flatKeys.push(key);}
             flatWeights[key]+=aw;flatR[key]+=r*aw;flatG[key]+=g*aw;flatB[key]+=b*aw;
-            if(flat<0||flatWeights[key]>flatWeights[flat])flat=key;
           }
           if(!ridge[index])continue;
+          // Stroke support uses the wider bins so tiny shade/compression
+          // changes along a one-pixel line cannot fragment its continuity.
+          const key=(r>>5)*64+(g>>5)*8+(b>>5);
           totalRidge+=w;
           if(stamps[key]!==stamp){
             stamps[key]=stamp;weights[key]=alpha[key]=red[key]=green[key]=blue[key]=0;
@@ -106,11 +139,9 @@
       const out=cell*4;
       if(!sumA)continue;
       let r=sumR/sumA,g=sumG/sumA,b=sumB/sumA,a=sumA/area;
-      if(flat>=0&&flatWeights[flat]/sumA>.55){
-        const amount=strength*.45;
-        r+=(flatR[flat]/flatWeights[flat]-r)*amount;
-        g+=(flatG[flat]/flatWeights[flat]-g)*amount;
-        b+=(flatB[flat]/flatWeights[flat]-b)*amount;
+      const flat=flatKeys.length?dominantFlat(flatKeys,stamp,flatStamps,flatWeights,flatR,flatG,flatB):null;
+      if(flat&&flat.weight/sumA>.55){
+        r+=(flat.r-r)*preserve;g+=(flat.g-g)*preserve;b+=(flat.b-b)*preserve;
       }
       if(best>=0){
         const fraction=weights[best]/area;
@@ -118,7 +149,10 @@
         // A meaningful run of pixels is required: don't turn one noisy speck
         // into a bead, or strengthen high-frequency texture across the tile.
         if(fraction>=.025+.08*(1-strength)&&totalRidge/area<=.45&&span>=.55){
-          const amount=Math.min(.95,strength*1.3),weight=alpha[best];
+          // Once a continuous stroke is identified, keep its own hue rather
+          // than tinting it with the surrounding fill. Low strength still
+          // transitions gradually from the ordinary area sample.
+          const amount=preserve,weight=alpha[best];
           r+=(red[best]/weight-r)*amount;g+=(green[best]/weight-g)*amount;b+=(blue[best]/weight-b)*amount;
           a=Math.max(a,a+(alpha[best]/weights[best]-a)*amount);
           // A subpixel opaque stroke can already have low coverage alpha in the
