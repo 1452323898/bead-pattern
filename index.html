@@ -26,12 +26,13 @@
     </section>
     <div class="workspace">
       <aside class="control-panel panel">
-        <section class="control-section"><h2><span class="step">01</span>选择图片</h2>
+        <section class="control-section" id="upload-section" tabindex="-1"><h2><span class="step">01</span>选择图片</h2>
           <label class="upload-zone" id="upload-zone" tabindex="0" role="button" aria-label="选择图片或拖入图片">
             <input id="file-input" type="file" accept="image/png,image/jpeg,image/webp" hidden>
             <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="6" y="5" width="28" height="30" rx="5"/><circle cx="15" cy="14" r="3"/><path d="m7 29 9-9 6 6 5-5 7 7"/></svg>
-            <strong>点击上传或拖入图片</strong><span>JPG、PNG、WebP · 最大 20 MB</span>
+            <strong><span class="wide-label">点击上传或拖入图片</span><span class="compact-label">点这里选择照片或图片</span></strong><span>JPG、PNG、WebP · 最大 20 MB</span>
           </label>
+          <p class="upload-feedback" id="upload-feedback" role="status" aria-live="polite" hidden></p>
           <div class="source-info" id="source-info" hidden><img id="source-thumb" alt="已选择的原图缩略图"><div><strong id="source-name"></strong><span id="source-size"></span></div><button class="icon-btn" id="clear-btn" aria-label="移除图片" title="移除图片">×</button></div>
           <button class="sample-btn" id="sample-btn">还没想好？试试几何示例 <span aria-hidden="true">✦</span></button>
           <p class="tool-disclosure"><strong>工具链接不是广告</strong>外部平台可能收费，遇到付费提示请谨慎；我未收取推广费或佣金。</p>
@@ -85,22 +86,25 @@
             </div>
           </details>
         </section>
-        <section class="control-section"><h2><span class="step">02</span>调整图纸</h2>
+        <section class="control-section" id="settings-section" tabindex="-1"><h2><span class="step">02</span>调整图纸</h2>
           <div class="field"><label for="palette">拼豆色卡</label><select id="palette" aria-describedby="palette-scope palette-note"><option value="mard221" selected>MARD · 221 色常规色卡</option><option value="mard291">MARD · 291 色扩展色卡</option></select><p class="privacy-note" id="palette-scope">只匹配所选色卡已有色号，不生成自定义颜色。屏幕色值为社区参考，购买前请核对实物；291 色含特殊材质。</p></div>
           <div class="field"><label for="columns">横向格数 <output id="columns-value" for="columns">48 <small>格</small></output></label><input type="range" id="columns" min="16" max="120" step="1" value="48"><div class="range-meta"><span>少一点，更好拼</span><span>多一点，更细腻</span></div></div>
           <div class="presets" aria-label="格数快捷设置"><button data-columns="29">29 格</button><button class="active" data-columns="48">48 格</button><button data-columns="72">72 格</button><button data-columns="96">96 格</button></div>
           <div class="field"><label for="colors">最多颜色 <output id="colors-value" for="colors">16 <small>色</small></output></label><input type="range" id="colors" min="4" max="32" value="16"><div class="range-meta"><span>颜色精简</span><span>还原细节</span></div></div>
           <div class="field"><label for="sampling">图片类型</label><select id="sampling" aria-describedby="sampling-note"><option value="photo">照片 / 渐变 · 自然过渡</option><option value="illustration">插画 / 动漫 · 清晰色块</option><option value="lineart">细线稿 / 表情包 · 保留线条</option><option value="pixel">像素画 · 保持原色块</option></select><p class="privacy-note" id="sampling-note">适合人像、风景和明暗渐变，柔和缩小并保留色调。肤色与衣服层次多时，可尝试 24–32 色。</p></div>
+          <details class="advanced-settings" id="advanced-settings" open><summary>描边与透明设置 <small>按需调整</small></summary><div class="advanced-content">
           <div class="field" id="detail-field" hidden><label for="detail-strength">线条保留 <output id="detail-value" for="detail-strength">70 <small>%</small></output></label><input type="range" id="detail-strength" min="0" max="100" step="5" value="70" aria-describedby="detail-note" disabled><div class="range-meta"><span>柔和</span><span>清晰</span></div><p class="privacy-note" id="detail-note">太粗或出现杂线时调低。细节仍丢失时，先裁掉多余背景，或试试 72 / 96 格。</p></div>
           <div class="outline-option"><label class="check-row"><input id="enhance-outline" type="checkbox" aria-describedby="outline-note outline-result"><span>外轮廓增强<small>识别原有描边色，让细外边缘更明显</small></span></label><p id="outline-note">适合透明或纯色底插画；沿用原描边颜色，只处理外轮廓。纯色背景仍会保留。</p><p id="outline-result" role="status" aria-live="polite" hidden></p></div>
           <label class="check-row"><input id="transparent" type="checkbox" checked><span>透明区域不放豆子<small>有透明背景的 PNG / WebP 适用</small></span></label>
+          </div></details>
           <button id="generate-btn" class="primary-btn" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M17.5 13v9M13 17.5h9"/></svg><span>生成拼豆图纸</span></button>
           <p class="privacy-note">本站生成图纸在本机完成，无需登录。</p>
         </section>
       </aside>
-      <section class="preview-panel panel" aria-label="图纸预览">
-        <div class="preview-toolbar"><div class="view-tabs" role="group" aria-label="预览模式"><button class="active" data-view="pattern" aria-pressed="true">拼豆图纸</button><button data-view="beads" aria-pressed="false">拼豆效果</button><button data-view="ironed" aria-pressed="false">成品效果</button><button data-view="original" aria-pressed="false">图片预览</button></div><span class="paper-tag">你的创作画布</span></div>
+      <section class="preview-panel panel" id="preview-panel" aria-label="图纸预览" tabindex="-1">
+        <div class="preview-toolbar"><div class="view-tabs" role="group" aria-label="预览模式"><button class="active" data-view="pattern" aria-label="拼豆图纸" aria-pressed="true"><span class="wide-label">拼豆图纸</span><span class="compact-label" aria-hidden="true">图纸</span></button><button data-view="beads" aria-label="拼豆效果" aria-pressed="false"><span class="wide-label">拼豆效果</span><span class="compact-label" aria-hidden="true">拼豆</span></button><button data-view="ironed" aria-label="成品效果" aria-pressed="false"><span class="wide-label">成品效果</span><span class="compact-label" aria-hidden="true">成品</span></button><button data-view="original" aria-label="图片预览" aria-pressed="false"><span class="wide-label">图片预览</span><span class="compact-label" aria-hidden="true">原图</span></button></div><span class="paper-tag">你的创作画布</span></div>
         <section class="physical-size-panel" id="physical-size-panel" aria-labelledby="physical-size-title" hidden>
+          <details class="size-settings" id="size-settings" open><summary><span>尺寸与参照</span><small id="size-settings-summary">2.6 毫米 · 手机</small></summary><div class="size-settings-content">
           <div class="physical-size-heading"><span id="physical-size-title">尺寸与参照设置</span></div><span id="physical-size-value" class="sr-only" aria-live="polite"></span>
           <div class="size-options">
             <label for="bead-pitch">豆子规格 / 格距<select id="bead-pitch" aria-describedby="physical-size-note"><option value="2.6">小豆 · 2.6 毫米</option><option value="5">大豆 · 5 毫米</option><option value="custom">自定义格距</option></select></label>
@@ -111,12 +115,13 @@
           <p class="pitch-error" id="pitch-error" role="status" hidden>请输入 1–10 毫米的格距（最多一位小数）；暂按上次有效值计算。</p>
           <p id="physical-size-note" class="size-note"></p>
           <p id="reference-note" class="size-note">示意手机 7 × 15 cm，与图案等比例缩放；屏幕显示并非实物 1:1。</p>
+          </div></details>
         </section>
         <div class="finish-controls" id="finish-controls" hidden>
           <div class="finish-heading"><span>普通烫成品</span><label><input id="floating-shadow" type="checkbox" checked>悬浮投影</label></div>
         </div>
         <div class="canvas-stage" id="canvas-stage">
-          <div class="empty-state" id="empty-state"><div class="empty-mosaic" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><h3>每一颗，都有自己的位置</h3><p>上传一张图片，就能在这里看到你的拼豆图纸</p><button id="empty-upload" class="outline-btn">选择一张图片</button><small>也可以从左侧的几何示例开始</small></div>
+          <div class="empty-state" id="empty-state"><div class="empty-mosaic" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><h3>每一颗，都有自己的位置</h3><p>上传一张图片，就能在这里看到你的拼豆图纸</p><button id="empty-upload" class="outline-btn">选择一张图片</button><small>也可以先试试几何示例</small></div>
           <div class="canvas-content" id="canvas-content" hidden>
             <div id="paper-reference-frame" aria-hidden="true" hidden></div>
             <canvas id="preview" hidden aria-label="生成的拼豆图纸，详细颜色数量见用色清单"></canvas>
@@ -136,11 +141,12 @@
         <div class="stats"><div><strong id="bead-total">—</strong><span>颗豆子</span></div><div><strong id="pattern-size">—</strong><span>格 × 格</span></div></div>
         <div class="palette-list" id="palette-list"><div class="palette-empty"><span aria-hidden="true">◌</span><p>图纸生成后<br>每种颜色的用量会出现在这里</p></div></div>
         <div class="palette-warning"><strong>关于颜色编号</strong><p id="palette-note">使用 MARD 221 色常规色号。屏幕色值来自社区参考色卡，请对照实物选豆；屏幕、打印与实物可能有色差。</p></div>
-        <div class="export-actions"><button id="download-btn" class="primary-btn" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 15v5h16v-5"/></svg>下载图纸 PNG</button><button id="print-btn" class="outline-btn" disabled>打印 / 保存为 PDF</button><small>导出包含编号、坐标和用色清单</small></div>
+        <div class="export-actions"><button id="download-btn" class="primary-btn" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 15v5h16v-5"/></svg>下载图纸 PNG</button><button id="print-btn" class="outline-btn" disabled>打印 / 保存为 PDF</button><small>导出包含编号、坐标和用色清单</small><small class="compact-label">保存的是 PNG 文件，下载位置由浏览器决定。</small></div>
       </aside>
     </div>
     <footer class="page-footer"><span>一格一颗，慢慢来，也很好。</span><span>图片本机处理 · 图纸生成可离线<br>自愿参与百度访问统计，帮我了解使用情况 <button type="button" id="analytics-settings" hidden>访问统计设置</button></span></footer>
   </main>
+  <nav class="mobile-actionbar" aria-label="手机快捷操作"><button type="button" id="mobile-upload">选图片</button><button type="button" id="mobile-settings" aria-controls="settings-section">调参数</button><button type="button" id="mobile-preview" aria-controls="preview-panel" disabled>看图纸</button><button type="button" id="mobile-save" class="mobile-save" disabled>保存 PNG</button></nav>
   <div id="print-root"></div>
 </body>
 </html>

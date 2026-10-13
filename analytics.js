@@ -1,7 +1,7 @@
 /* Optional visit analytics; image generation does not depend on this script. */
 (function () {
   'use strict';
-  if (location.hostname !== '1452323898.github.io' ||
+  if (location.hostname !== 'isaacvxe455msodmcqaf-web.github.io' ||
       (location.pathname !== '/bead-pattern' && !location.pathname.startsWith('/bead-pattern/'))) return;
 
   const key = 'bead-pattern.analytics-consent.v1';

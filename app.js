@@ -1,11 +1,15 @@
 (function(){'use strict';
   const $=id=>document.getElementById(id);
+  const mobileLayout=window.matchMedia('(max-width:760px)');
   const state={source:null,working:null,pattern:null,outlineResult:null,name:'拼豆图纸',view:'pattern',floating:true,pitchMm:2.6,reference:'phone',paper:true,zoom:1,fit:true,loadId:0,busy:false};
   const number=n=>n.toLocaleString('zh-CN');
   function status(message,error=false){$('status').textContent=message;$('status').classList.toggle('error',error);}
-  function updateControls(){const ready=!!state.pattern&&state.pattern.total>0;['download-btn','print-btn'].forEach(id=>$(id).disabled=!ready||state.busy);['zoom-in','zoom-out','zoom-fit'].forEach(id=>$(id).disabled=!state.pattern||state.view==='original');$('generate-btn').disabled=!state.source||state.busy;$('show-labels').disabled=state.view!=='pattern';}
-  function showSource(source,name,url){state.source=source;state.working=null;state.outlineResult=null;state.name=name.replace(/\.[^.]+$/,'');$('source-name').textContent=name;$('source-size').textContent=`${source.width} × ${source.height} 像素`;$('source-info').hidden=false;$('source-thumb').src=url;$('original-preview').src=url;updateControls();generate();}
-  async function loadFile(file){if(!file)return;const token=++state.loadId;state.busy=false;updateControls();if(!['image/png','image/jpeg','image/webp'].includes(file.type)){status('请选择 JPG、PNG 或 WebP 图片。',true);return;}if(file.size>20*1024*1024){status('这张图片超过 20 MB，请缩小后再试。',true);return;}state.busy=true;updateControls();status('正在读取图片…');let url=URL.createObjectURL(file);try{const img=new Image();img.src=url;await img.decode();if(token!==state.loadId)return;if(img.naturalWidth*img.naturalHeight>40000000)throw new Error('这张图片超过 4000 万像素，请缩小后再试。');const thumb=document.createElement('canvas');const scale=Math.min(1,1000/img.naturalWidth,1000/img.naturalHeight);thumb.width=Math.max(1,Math.round(img.naturalWidth*scale));thumb.height=Math.max(1,Math.round(img.naturalHeight*scale));thumb.getContext('2d').drawImage(img,0,0,thumb.width,thumb.height);showSource(img,file.name,thumb.toDataURL('image/png'));}catch(e){if(token===state.loadId)status(e.message.includes('像素')?e.message:'图片未能读取，请换一张有效图片再试。',true);}finally{URL.revokeObjectURL(url);if(token===state.loadId){state.busy=false;updateControls();}}}
+  function uploadFeedback(message='',error=false){const node=$('upload-feedback');node.textContent=message;node.hidden=!message;node.classList.toggle('error',error);}
+  function uploadError(message){status(message,true);uploadFeedback(message,true);revealMobileSection('upload-section');}
+  function updateControls(){const ready=!!state.pattern&&state.pattern.total>0;['download-btn','print-btn','mobile-save'].forEach(id=>$(id).disabled=!ready||state.busy);['zoom-in','zoom-out','zoom-fit'].forEach(id=>$(id).disabled=!state.pattern||state.view==='original');$('generate-btn').disabled=!state.source||state.busy;$('show-labels').disabled=state.view!=='pattern';$('mobile-preview').disabled=!state.pattern;$('mobile-upload').textContent=state.source?'换图片':'选图片';}
+  function revealMobileSection(id){if(!mobileLayout.matches)return;const node=$(id);node.focus({preventScroll:true});node.scrollIntoView({block:'start',behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});}
+  function showSource(source,name,url){uploadFeedback();state.source=source;state.working=null;state.outlineResult=null;state.name=name.replace(/\.[^.]+$/,'');$('source-name').textContent=name;$('source-size').textContent=`${source.width} × ${source.height} 像素`;$('source-info').hidden=false;$('source-thumb').src=url;$('original-preview').src=url;updateControls();generate({reveal:true});}
+  async function loadFile(file){if(!file)return;const token=++state.loadId;state.busy=false;updateControls();if(!['image/png','image/jpeg','image/webp'].includes(file.type)){uploadError('请选择 JPG、PNG 或 WebP 图片。');return;}if(file.size>20*1024*1024){uploadError('这张图片超过 20 MB，请缩小后再试。');return;}state.busy=true;updateControls();status('正在读取图片…');uploadFeedback('正在读取图片…');let url=URL.createObjectURL(file);try{const img=new Image();img.src=url;await img.decode();if(token!==state.loadId)return;if(img.naturalWidth*img.naturalHeight>40000000)throw new Error('这张图片超过 4000 万像素，请缩小后再试。');const thumb=document.createElement('canvas');const scale=Math.min(1,1000/img.naturalWidth,1000/img.naturalHeight);thumb.width=Math.max(1,Math.round(img.naturalWidth*scale));thumb.height=Math.max(1,Math.round(img.naturalHeight*scale));thumb.getContext('2d').drawImage(img,0,0,thumb.width,thumb.height);showSource(img,file.name,thumb.toDataURL('image/png'));}catch(e){if(token===state.loadId)uploadError(e.message.includes('像素')?e.message:'图片未能读取，请换一张有效图片再试。');}finally{URL.revokeObjectURL(url);if(token===state.loadId){state.busy=false;updateControls();}}}
   function sample(){state.loadId++;state.busy=false;const canvas=document.createElement('canvas');canvas.width=480;canvas.height=480;const ctx=canvas.getContext('2d');const colors=['#284d3c','#ed9a54','#f8db9a','#e5eee1','#9bbfa6','#c86740'];const size=20;for(let y=0;y<24;y++)for(let x=0;x<24;x++){const dx=x-11.5,dy=y-11.5;let index=3;if(Math.abs(dx)+Math.abs(dy)<10)index=1;if(Math.abs(dx)+Math.abs(dy)<7)index=2;if(Math.abs(dx)+Math.abs(dy)<4)index=0;if((x<5||x>18)&&(y<5||y>18))index=4;if((x===y||x+y===23)&&Math.abs(dx)>8)index=5;ctx.fillStyle=colors[index];ctx.fillRect(x*size,y*size,size,size);}$('sampling').value='pixel';$('columns').value=48;syncLabels();showSource(canvas,'几何拼布示例',canvas.toDataURL());}
   function syncLabels(){$('columns-value').innerHTML=`${$('columns').value} <small>格</small>`;$('colors-value').innerHTML=`${$('colors').value} <small>色</small>`;document.querySelectorAll('[data-columns]').forEach(b=>b.classList.toggle('active',b.dataset.columns===$('columns').value));syncSamplingControls();}
   function invalidate(){syncLabels();updatePaletteNote();if(state.source)generate();else updateOutlineResult();}
@@ -47,8 +51,9 @@
       '没有识别到清晰的原有外描边，保持原采样。可尝试透明或纯色底插画。';
   }
   function updatePaletteNote(){const catalog=selectedCatalog();$('palette-note').textContent=catalog.id==='mard291'?'只使用 MARD 291 参考库已有的色号与对应色值。含透明、珠光等特殊豆，屏幕不能还原其材质；T1 是透明豆，仍需放豆。色值来自社区表，非官方实测，购买前请核对实物色卡。':'只使用 MARD 221 参考库已有的色号与对应色值，图纸、预览和清单共用同一套配色。RGB 来自社区表，非官方实测；屏幕、批次及烫制可能产生色差，购买前请核对实物色卡。';}
-  function generate(){
+  function generate({reveal=false}={}){
     if(!state.source)return;
+    const loadId=state.loadId;
     try{
       const size=BeadCore.fitGrid(state.source.width,state.source.height,+$('columns').value),transparent=$('transparent').checked;
       let data=sampleSource(size),importance=null,outlineResult=null;
@@ -62,6 +67,7 @@
       state.outlineResult=outlineResult;resetView();renderPalette();render();
       const p=state.pattern;
       status(p.total===0?'这张图片在当前设置下全是透明格子。可取消“透明区域不放豆子”再试。':`图纸已生成 · ${number(p.total)} 颗豆子，${p.palette.length} 种颜色。${size.width!==+$('columns').value?'长图已按比例缩小，纵向最多 160 格。':'每格 1 颗豆子，粗线每 10 格。'}`);
+      if(reveal)requestAnimationFrame(()=>{if(state.pattern===p&&state.loadId===loadId)revealMobileSection('preview-panel');});
     }catch(e){status('生成失败：'+e.message,true);}
     updateControls();
   }
@@ -73,6 +79,7 @@
     if(!measurement){['reference-coin','reference-phone','dimension-overlay','paper-reference-frame','paper-reference-label'].forEach(id=>$(id).setAttribute('hidden',''));return;}
     const cm=mm=>(mm/10).toLocaleString('zh-CN',{maximumFractionDigits:2});
     $('physical-size-value').textContent=`约 ${cm(measurement.widthMm)} × ${cm(measurement.heightMm)} cm`;
+    $('size-settings-summary').textContent=`${state.pitchMm} 毫米 · ${ {phone:'手机',coin:'硬币',both:'硬币＋手机',none:'不显示参照'}[state.reference] }`;
     $('physical-size-note').textContent=`按 ${state.pitchMm} 毫米格距估算 · 主体 ${measurement.bounds.width} × ${measurement.bounds.height} 格，不计透明外边。材料与烫制会影响实际大小。`;
     const notes={coin:'示意硬币直径 2.5 cm',phone:'示意手机 7 × 15 cm',both:'示意硬币直径 2.5 cm · 示意手机 7 × 15 cm'};
     $('reference-note').textContent=state.reference==='none'?'屏幕显示并非实物 1:1；可选择参照物比较大小。':`${notes[state.reference]}，与图案等比例缩放；屏幕显示并非实物 1:1。`;
@@ -231,7 +238,7 @@
   window.addEventListener('resize',endTouch);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)endTouch();});
   $('file-input').addEventListener('change',e=>{loadFile(e.target.files[0]);e.target.value='';});$('empty-upload').addEventListener('click',()=>$('file-input').click());$('upload-zone').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('file-input').click();}});['dragenter','dragover'].forEach(type=>$('upload-zone').addEventListener(type,e=>{e.preventDefault();$('upload-zone').classList.add('dragging');}));['dragleave','drop'].forEach(type=>$('upload-zone').addEventListener(type,e=>{e.preventDefault();$('upload-zone').classList.remove('dragging');if(type==='drop')loadFile(e.dataTransfer.files[0]);}));
-  $('sample-btn').addEventListener('click',sample);$('generate-btn').addEventListener('click',generate);['columns','colors','detail-strength'].forEach(id=>{$(id).addEventListener('input',syncLabels);$(id).addEventListener('change',invalidate);});['sampling','transparent','palette'].forEach(id=>$(id).addEventListener('change',invalidate));document.querySelectorAll('[data-columns]').forEach(b=>b.addEventListener('click',()=>{$('columns').value=b.dataset.columns;invalidate();}));document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{resetView();state.view=b.dataset.view;render();}));$('show-labels').addEventListener('change',render);$('zoom-fit').addEventListener('click',()=>{resetView();sizePreview();});$('zoom-in').addEventListener('click',()=>zoom(1.4));$('zoom-out').addEventListener('click',()=>zoom(1/1.4));new ResizeObserver(()=>sizePreview()).observe($('canvas-stage'));
+  $('sample-btn').addEventListener('click',sample);$('generate-btn').addEventListener('click',()=>generate({reveal:true}));['columns','colors','detail-strength'].forEach(id=>{$(id).addEventListener('input',syncLabels);$(id).addEventListener('change',invalidate);});['sampling','transparent','palette'].forEach(id=>$(id).addEventListener('change',invalidate));document.querySelectorAll('[data-columns]').forEach(b=>b.addEventListener('click',()=>{$('columns').value=b.dataset.columns;invalidate();}));document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{resetView();state.view=b.dataset.view;render();}));$('show-labels').addEventListener('change',render);$('zoom-fit').addEventListener('click',()=>{resetView();sizePreview();});$('zoom-in').addEventListener('click',()=>zoom(1.4));$('zoom-out').addEventListener('click',()=>zoom(1/1.4));new ResizeObserver(()=>sizePreview()).observe($('canvas-stage'));
   $('floating-shadow').addEventListener('change',()=>{state.floating=$('floating-shadow').checked;render();});
   $('enhance-outline').addEventListener('change',invalidate);
   $('bead-pitch').addEventListener('change',()=>{
@@ -247,12 +254,21 @@
   });
   $('size-reference').addEventListener('change',()=>{state.reference=$('size-reference').value;resetView();render();});
   $('paper-reference').addEventListener('change',()=>{state.paper=$('paper-reference').checked;resetView();render();});
-  $('clear-btn').addEventListener('click',()=>{state.loadId++;state.busy=false;resetView();state.source=null;state.working=null;state.pattern=null;$('source-info').hidden=true;$('original-preview').removeAttribute('src');$('source-thumb').removeAttribute('src');$('bead-total').textContent='—';$('pattern-size').textContent='—';$('palette-badge').textContent='0 色';$('grid-meta').textContent='等待上传图片';$('palette-list').innerHTML='<div class="palette-empty"><span aria-hidden="true">◌</span><p>图纸生成后<br>每种颜色的用量会出现在这里</p></div>';render();status('已移除图片，可以开始新的创作。');});
+  $('clear-btn').addEventListener('click',()=>{uploadFeedback();state.loadId++;state.busy=false;resetView();state.source=null;state.working=null;state.pattern=null;$('source-info').hidden=true;$('original-preview').removeAttribute('src');$('source-thumb').removeAttribute('src');$('bead-total').textContent='—';$('pattern-size').textContent='—';$('palette-badge').textContent='0 色';$('grid-meta').textContent='等待上传图片';$('palette-list').innerHTML='<div class="palette-empty"><span aria-hidden="true">◌</span><p>图纸生成后<br>每种颜色的用量会出现在这里</p></div>';render();status('已移除图片，可以开始新的创作。');});
   $('download-btn').addEventListener('click',()=>{if(BeadExport.download)BeadExport.download(state.pattern,state.name,status);});$('print-btn').addEventListener('click',()=>{if(BeadExport.print)BeadExport.print(state.pattern,state.name,status);});
   $('copy-prompt').addEventListener('click',async()=>{
     const field=$('cutout-prompt');
     try{await navigator.clipboard.writeText(field.value);$('copy-status').textContent='已复制；记得把【主体】改成你要保留的内容。';}
     catch{field.focus();field.select();$('copy-status').textContent='提示词已选中，请长按复制，或按 Ctrl+C / ⌘C。';}
   });
-  syncSamplingControls();updatePaletteNote();updateControls();
+  $('mobile-upload').addEventListener('click',()=>$('file-input').click());
+  $('mobile-settings').addEventListener('click',()=>revealMobileSection('settings-section'));
+  $('mobile-preview').addEventListener('click',()=>revealMobileSection('preview-panel'));
+  $('mobile-save').addEventListener('click',()=>$('download-btn').click());
+  function syncResponsiveControls(){
+    // Only set defaults when entering a layout, not on generation or changes.
+    for(const id of ['advanced-settings','size-settings'])$(id).open=!mobileLayout.matches;
+  }
+  mobileLayout.addEventListener('change',syncResponsiveControls);
+  syncResponsiveControls();syncSamplingControls();updatePaletteNote();updateControls();
 })();
