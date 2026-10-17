@@ -76,7 +76,7 @@
         </section>
         <section class="control-section" id="settings-section" tabindex="-1"><h2><span class="step">02</span>调整图纸</h2>
           <div class="field"><label for="palette">拼豆色卡</label><select id="palette" aria-describedby="palette-scope palette-note"><option value="mard221" selected>MARD · 221 色常规色卡</option><option value="mard291">MARD · 291 色扩展色卡</option></select><p class="privacy-note" id="palette-scope">只匹配所选色卡已有色号，不生成自定义颜色。屏幕色值为社区参考，购买前请核对实物；291 色含特殊材质。</p></div>
-          <div class="field"><label for="columns">横向格数 <output id="columns-value" for="columns">48 <small>格</small></output></label><input type="range" id="columns" min="16" max="120" step="1" value="48"><div class="range-meta"><span>少一点，更好拼</span><span>多一点，更细腻</span></div></div>
+          <div class="field"><label for="columns">横向格数 <output id="columns-value" for="columns">48 <small>格</small></output></label><input type="range" id="columns" min="16" max="120" step="1" value="48" aria-describedby="grid-size-hint"><div class="range-meta"><span>少一点，更好拼</span><span>多一点，更细腻</span></div><p class="grid-size-hint" id="grid-size-hint">纵向按图片比例自动计算，最多 160 格；选板请看生成后的横纵格数。</p></div>
           <div class="presets" aria-label="格数快捷设置"><button data-columns="29">29 格</button><button class="active" data-columns="48">48 格</button><button data-columns="72">72 格</button><button data-columns="96">96 格</button></div>
           <div class="field"><label for="colors">最多颜色 <output id="colors-value" for="colors">16 <small>色</small></output></label><input type="range" id="colors" min="4" max="32" value="16"><div class="range-meta"><span>颜色精简</span><span>还原细节</span></div></div>
           <div class="field"><label for="sampling">图片类型</label><select id="sampling" aria-describedby="sampling-note"><option value="photo">照片 / 渐变 · 自然过渡</option><option value="illustration">插画 / 动漫 · 清晰色块</option><option value="lineart">细线稿 / 表情包 · 保留线条</option><option value="pixel">像素画 · 保持原色块</option></select><p class="privacy-note" id="sampling-note">适合人像、风景和明暗渐变，柔和缩小并保留色调。肤色与衣服层次多时，可尝试 24–32 色。</p></div>
@@ -123,6 +123,14 @@
         <p class="preview-note gesture-note" id="gesture-note" hidden><strong class="mouse-help">滚轮缩放 · 左键按住拖动 · 点击“适应”复位</strong><strong class="touch-help">双指捏合缩放 · 单指按住拖动放大后的图案<br>从画布外滑动页面；点击“适应”复位。</strong></p>
         <p class="preview-note" id="ironed-note" hidden>成品外观模拟；实际纹理、颜色及孔洞随材料和烫法而异。</p>
         <div class="canvas-footer"><label class="check-inline"><input id="show-labels" type="checkbox" checked>显示编号</label><span id="grid-meta">等待上传图片</span><div class="zoom-controls"><button id="zoom-out" aria-label="缩小图纸" disabled>−</button><button id="zoom-fit" disabled>适应</button><button id="zoom-in" aria-label="放大图纸" disabled>＋</button></div></div>
+        <section class="pattern-details" id="pattern-details" aria-labelledby="pattern-details-title" hidden>
+          <h3 id="pattern-details-title">图纸尺寸与用豆</h3>
+          <div class="board-grid-size"><div><span>横向（列）</span><strong><span id="board-columns">—</span> <small>格</small></strong></div><div><span>纵向（行）</span><strong><span id="board-rows">—</span> <small>格</small></strong></div></div>
+          <p class="board-note">按以上整图格数选板（含留空格），不足可拼接；板的格距需与豆子规格匹配。</p>
+          <div class="pattern-materials-heading"><h4>色号与所需数量</h4><span id="pattern-materials-total"></span></div>
+          <ul class="pattern-materials" id="pattern-materials" aria-label="图纸各色号所需豆子数量"></ul>
+          <p class="board-note" id="pattern-materials-note">每格 1 颗，透明格留空；以下为实际用量，未加备用豆。</p>
+        </section>
         <div class="status-bar" id="status" role="status" aria-live="polite">准备好了吗？从一张喜欢的图片开始。</div>
       </section>
       <aside class="palette-panel panel"><div class="palette-heading"><h2>用色清单</h2><span id="palette-badge">0 色</span></div><p class="palette-subtitle">照着编号，准备你的豆子。</p>

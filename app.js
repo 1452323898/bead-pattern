@@ -92,6 +92,24 @@
     const notes={coin:'示意硬币直径 2.5 cm',phone:'示意手机 7 × 15 cm',both:'示意硬币直径 2.5 cm · 示意手机 7 × 15 cm'};
     $('reference-note').textContent=state.reference==='none'?'屏幕显示并非实物 1:1；可选择参照物比较大小。':`${notes[state.reference]}，与图案等比例缩放；屏幕显示并非实物 1:1。`;
   }
+  function renderPatternDetails(){
+    const p=state.pattern;
+    $('pattern-details').hidden=!p||state.view!=='pattern';
+    $('pattern-materials').replaceChildren();
+    if(!p){$('grid-size-hint').textContent='纵向按图片比例自动计算，最多 160 格；选板请看生成后的横纵格数。';return;}
+    $('grid-size-hint').textContent=`实际图纸：横向 ${p.width} 格 × 纵向 ${p.height} 格。纵向按比例自动计算，最多 160 格${p.width!==+$('columns').value?'，长图横向也已同比缩小':''}。`;
+    $('grid-meta').textContent=`横向 ${p.width} 格 × 纵向 ${p.height} 格`;
+    $('board-columns').textContent=p.width;$('board-rows').textContent=p.height;
+    $('pattern-materials-total').textContent=`共 ${p.palette.length} 色 · ${number(p.total)} 颗`;
+    $('pattern-materials-note').textContent=p.total?'每格 1 颗，透明格留空；以上为实际用量，未加备用豆。':'当前图纸全是透明格，没有需要准备的豆子。';
+    for(const color of p.palette.slice().sort((a,b)=>a.code.localeCompare(b.code,'en',{numeric:true}))){
+      const item=document.createElement('li');
+      const swatch=document.createElement('span');swatch.className='material-swatch';swatch.style.background=color.hex;swatch.setAttribute('aria-hidden','true');
+      const code=document.createElement('strong');code.textContent=color.code;
+      const count=document.createElement('span');count.className='material-count';count.textContent=`${number(color.count)} 颗`;
+      item.append(swatch,code,count);$('pattern-materials').append(item);
+    }
+  }
   function render(){
     const p=state.pattern,original=state.view==='original';
     $('ironed-note').hidden=!p||state.view!=='ironed';$('finish-controls').hidden=!p||state.view!=='ironed';
@@ -102,6 +120,7 @@
     $('empty-state').hidden=!!p;$('canvas-content').hidden=!p;$('preview').hidden=!p||original;$('original-preview').hidden=!p||!original;
     document.querySelectorAll('[data-view]').forEach(b=>{const active=b.dataset.view===state.view;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
     updateSizeInfo();
+    renderPatternDetails();
     updateOutlineResult();
     if(p&&!original){BeadExport.drawGrid($('preview'),p,{cell:24,labels:$('show-labels').checked,beads:state.view==='beads',ironed:state.view==='ironed',floating:state.floating});sizePreview();}
     else if(original){const area=$('canvas-content');area.style.width='100%';area.style.height='100%';}
