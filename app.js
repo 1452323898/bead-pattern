@@ -6,7 +6,15 @@
   function status(message,error=false){$('status').textContent=message;$('status').classList.toggle('error',error);}
   function uploadFeedback(message='',error=false){const node=$('upload-feedback');node.textContent=message;node.hidden=!message;node.classList.toggle('error',error);}
   function uploadError(message){status(message,true);uploadFeedback(message,true);revealMobileSection('upload-section');}
-  function updateControls(){const ready=!!state.pattern&&state.pattern.total>0;['download-btn','print-btn','mobile-save'].forEach(id=>$(id).disabled=!ready||state.busy);['zoom-in','zoom-out','zoom-fit'].forEach(id=>$(id).disabled=!state.pattern||state.view==='original');$('generate-btn').disabled=!state.source||state.busy;$('show-labels').disabled=state.view!=='pattern';$('mobile-preview').disabled=!state.pattern;$('mobile-upload').textContent=state.source?'换图片':'选图片';}
+  function updateControls(){const ready=!!state.pattern&&state.pattern.total>0;['download-btn','print-btn','mobile-save','purchase-copy','purchase-download','purchase-format'].forEach(id=>$(id).disabled=!ready||state.busy);['zoom-in','zoom-out','zoom-fit'].forEach(id=>$(id).disabled=!state.pattern||state.view==='original');$('generate-btn').disabled=!state.source||state.busy;$('show-labels').disabled=state.view!=='pattern';$('mobile-preview').disabled=!state.pattern;$('mobile-upload').textContent=state.source?'换图片':'选图片';updatePurchaseList();}
+  function purchaseOptions(){return {pitchMm:state.pitchMm,format:$('purchase-format').value};}
+  function purchaseStatus(message,error=false){$('purchase-status').textContent=message;$('purchase-status').classList.toggle('error',error);}
+  function updatePurchaseList(){
+    const field=$('purchase-text');
+    const text=state.busy?'':BeadExport.purchaseText(state.pattern,purchaseOptions());
+    if(field.value!==text){field.value=text;purchaseStatus('');}
+    $('purchase-note').textContent=$('purchase-format').value==='codes'?'此格式只含色号，不含品牌、规格或颗数；发给商家时请另行说明。':'按图纸实际用量填写，未加备用豆、未扣已有库存。请向商家确认豆子规格和包装数量。';
+  }
   function revealMobileSection(id){if(!mobileLayout.matches)return;const node=$(id);node.focus({preventScroll:true});node.scrollIntoView({block:'start',behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});}
   function showSource(source,name,url){uploadFeedback();state.source=source;state.working=null;state.outlineResult=null;state.name=name.replace(/\.[^.]+$/,'');$('source-name').textContent=name;$('source-size').textContent=`${source.width} × ${source.height} 像素`;$('source-info').hidden=false;$('source-thumb').src=url;$('original-preview').src=url;updateControls();generate({reveal:true});}
   async function loadFile(file){if(!file)return;const token=++state.loadId;state.busy=false;updateControls();if(!['image/png','image/jpeg','image/webp'].includes(file.type)){uploadError('请选择 JPG、PNG 或 WebP 图片。');return;}if(file.size>20*1024*1024){uploadError('这张图片超过 20 MB，请缩小后再试。');return;}state.busy=true;updateControls();status('正在读取图片…');uploadFeedback('正在读取图片…');let url=URL.createObjectURL(file);try{const img=new Image();img.src=url;await img.decode();if(token!==state.loadId)return;if(img.naturalWidth*img.naturalHeight>40000000)throw new Error('这张图片超过 4000 万像素，请缩小后再试。');const thumb=document.createElement('canvas');const scale=Math.min(1,1000/img.naturalWidth,1000/img.naturalHeight);thumb.width=Math.max(1,Math.round(img.naturalWidth*scale));thumb.height=Math.max(1,Math.round(img.naturalHeight*scale));thumb.getContext('2d').drawImage(img,0,0,thumb.width,thumb.height);showSource(img,file.name,thumb.toDataURL('image/png'));}catch(e){if(token===state.loadId)uploadError(e.message.includes('像素')?e.message:'图片未能读取，请换一张有效图片再试。');}finally{URL.revokeObjectURL(url);if(token===state.loadId){state.busy=false;updateControls();}}}
@@ -256,6 +264,19 @@
   $('paper-reference').addEventListener('change',()=>{state.paper=$('paper-reference').checked;resetView();render();});
   $('clear-btn').addEventListener('click',()=>{uploadFeedback();state.loadId++;state.busy=false;resetView();state.source=null;state.working=null;state.pattern=null;$('source-info').hidden=true;$('original-preview').removeAttribute('src');$('source-thumb').removeAttribute('src');$('bead-total').textContent='—';$('pattern-size').textContent='—';$('palette-badge').textContent='0 色';$('grid-meta').textContent='等待上传图片';$('palette-list').innerHTML='<div class="palette-empty"><span aria-hidden="true">◌</span><p>图纸生成后<br>每种颜色的用量会出现在这里</p></div>';render();status('已移除图片，可以开始新的创作。');});
   $('download-btn').addEventListener('click',()=>{if(BeadExport.download)BeadExport.download(state.pattern,state.name,status);});$('print-btn').addEventListener('click',()=>{if(BeadExport.print)BeadExport.print(state.pattern,state.name,status);});
+  $('purchase-format').addEventListener('change',updatePurchaseList);
+  $('purchase-copy').addEventListener('click',async()=>{
+    const field=$('purchase-text'),text=field.value;if(!text||state.busy)return;
+    try{
+      await navigator.clipboard.writeText(text);
+      if(field.value===text)purchaseStatus('已复制，可粘贴给商家。');
+    }catch{
+      if(field.value!==text)return;
+      field.focus();field.select();field.setSelectionRange(0,text.length);
+      purchaseStatus('清单已选中，请长按复制，或按 Ctrl+C / ⌘C；也可下载 TXT。');
+    }
+  });
+  $('purchase-download').addEventListener('click',()=>{if(!state.busy)BeadExport.downloadPurchase(state.pattern,purchaseOptions(),purchaseStatus);});
   $('copy-prompt').addEventListener('click',async()=>{
     const field=$('cutout-prompt');
     try{await navigator.clipboard.writeText(field.value);$('copy-status').textContent='已复制；记得把【主体】改成你要保留的内容。';}
@@ -270,5 +291,7 @@
     for(const id of ['advanced-settings','size-settings'])$(id).open=!mobileLayout.matches;
   }
   mobileLayout.addEventListener('change',syncResponsiveControls);
+  // Start folded on every fresh page load; later renders keep the user's choice.
+  $('purchase-panel').open=false;
   syncResponsiveControls();syncSamplingControls();updatePaletteNote();updateControls();
 })();

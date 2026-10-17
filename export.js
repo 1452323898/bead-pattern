@@ -9,6 +9,44 @@
       note:extended?'MARD 291 为社区扩展色卡，含特殊豆；请按实物选豆，透明／珠光等材质仅以参考颜色预览。':mard?'MARD 色号来自社区色卡；屏幕与打印颜色仅供参考，实物豆子可能有色差。':'C01 等为本图自定义编号，非品牌色号。对照实物色卡选豆；屏幕与打印颜色可能存在色差。'
     };
   }
+  function purchaseText(pattern,{pitchMm=2.6,format='lines'}={}){
+    if(!pattern||!(pattern.total>0)||!['mard221','mard291'].includes(pattern.paletteId))return '';
+    const colors=(pattern.palette||[]).filter(color=>Number.isSafeInteger(color.count)&&color.count>0)
+      .slice().sort((a,b)=>a.code.localeCompare(b.code,'en',{numeric:true}));
+    if(!colors.length)return '';
+    if(format==='codes')return colors.map(color=>color.code).join(' ');
+    const pitch=Number.isFinite(pitchMm)&&pitchMm>0?pitchMm:2.6;
+    const total=colors.reduce((sum,color)=>sum+color.count,0);
+    const palette=pattern.paletteId==='mard291'?'MARD 291 色':'MARD 221 色';
+    const items=colors.map(color=>`${color.code} × ${color.count} 颗`);
+    return [
+      '拼豆采购清单',
+      `色卡：${palette}`,
+      `规格/格距：${pitch} 毫米（当前设置，请向商家确认规格）`,
+      '',
+      items.join(format==='compact'?'，':'\n'),
+      '',
+      `合计：${colors.length} 种颜色，${total} 颗`,
+      '数量按当前图纸用量计算，未加备用量，未扣已有库存。',
+      '请向商家确认品牌、规格、色号和每包数量，再按包装购买。'
+    ].join('\n');
+  }
+  function downloadPurchase(pattern,options={},status=()=>{}){
+    const text=purchaseText(pattern,options);
+    if(!text){status('请先生成有豆子的 MARD 图纸，再导出采购清单。',true);return false;}
+    let url,link;
+    try{
+      const blob=new Blob(['\uFEFF',text.replace(/\n/g,'\r\n')],{type:'text/plain;charset=utf-8'});
+      url=URL.createObjectURL(blob);link=document.createElement('a');
+      link.href=url;link.download='拼豆采购清单.txt';
+      document.body.append(link);link.click();link.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),30000);
+      status('已发起 TXT 采购清单下载，可发送给商家确认。');return true;
+    }catch{
+      if(link)link.remove();if(url)URL.revokeObjectURL(url);
+      status('TXT 下载失败，请使用复制清单，或手动复制预览文字。',true);return false;
+    }
+  }
   function drawGrid(canvas,pattern,{cell=24,labels=true,beads=false,ironed=false,floating=true,tile=null}={}) {
     if(ironed)return BeadFinish.draw(canvas,pattern,{floating});
     const part=tile||{x:0,y:0,width:pattern.width,height:pattern.height};
@@ -63,5 +101,5 @@
     parts.forEach((tile,i)=>{const section=document.createElement('section');section.className='print-page';const heading=document.createElement('p');heading.textContent=`${name.slice(0,40)} · 分块 ${i+1}/${parts.length} · 列 ${tile.x+1}–${tile.x+tile.width} / 行 ${tile.y+1}–${tile.y+tile.height}`;const canvas=drawGrid(document.createElement('canvas'),pattern,{cell:24,labels:true,tile});const img=new Image();img.alt=heading.textContent;img.src=canvas.toDataURL('image/png');img.style.width=(canvas.width/1032*185)+'mm';section.append(heading,img);root.append(section);images.push(img);});
     try{await Promise.all(images.map(img=>img.decode()));status(`已准备 ${parts.length+1} 页打印稿。可在打印窗口选择“另存为 PDF”。`);window.print();}catch{status('打印稿准备失败，请使用 PNG 下载。',true);}
   }
-  window.BeadExport={drawGrid,drawSheet,download,print,contrast};
+  window.BeadExport={drawGrid,drawSheet,download,print,contrast,purchaseText,downloadPurchase};
 })();

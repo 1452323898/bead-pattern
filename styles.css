@@ -72,3 +72,15 @@
 @media(max-width:380px){.palette-list{grid-template-columns:1fr}.color-row{gap:12px}.color-name{font-size:15px}.color-count{font-size:15px}.local-badge svg{display:none}.local-badge{padding:7px 8px;font-size:10px}.canvas-footer{padding-inline:10px}.canvas-footer>span{flex:1}.canvas-footer .zoom-controls{width:100%;justify-content:center}.zoom-controls button{flex:1}.zoom-controls button:nth-child(2){flex:2}}
 @media(prefers-reduced-motion:reduce){button,.guide-toggle{transition:none}}
 @media print{body{padding-bottom:0}.mobile-actionbar{display:none!important}}
+
+/* Merchant-ready text stays with the material list, alongside image exports. */
+.guide-content>.guide-links{margin:0 0 14px}
+.purchase-panel{grid-column:1/-1;min-width:0;width:100%;border:1px solid #ceddd2;border-radius:9px;background:#f5f9f5;color:#365540}
+.purchase-panel>summary{cursor:pointer;padding:12px 10px;min-height:44px;font-size:14px;font-weight:600;line-height:1.6}
+.purchase-panel>summary:focus-visible{outline:3px solid #e88b47;outline-offset:-3px;border-radius:8px}
+.purchase-content{padding:0 10px 12px;min-width:0}.purchase-content label{display:block;font-size:13px;margin:2px 0 7px}
+.purchase-content select,.purchase-content textarea{display:block;width:100%;min-width:0;max-width:100%;border:1px solid #cbd8ce;border-radius:7px;background:#fff;color:#314b3b;font:inherit;font-size:13px;padding:9px}
+.purchase-content select{min-height:44px}.purchase-content textarea{line-height:1.65;margin-top:10px;resize:vertical;min-height:160px;max-height:380px;white-space:pre-wrap;overflow-wrap:anywhere}
+.purchase-content p{font-size:12px;line-height:1.7;color:#607565;margin:9px 0}.purchase-actions{display:grid;grid-template-columns:1fr;gap:8px}.purchase-actions button{min-height:44px;font-size:14px;background:#fff}
+#purchase-status{margin-bottom:0;color:#365b43}#purchase-status:empty{display:none}#purchase-status.error{color:#a44734}
+@media(max-width:760px){.purchase-content{padding:0 12px 14px}.purchase-panel>summary{min-height:48px;padding:13px 12px}.purchase-content select,.purchase-content textarea{font-size:16px}.purchase-actions button{min-height:48px}.purchase-content textarea{height:clamp(180px,32svh,280px);scroll-margin-bottom:calc(90px + env(safe-area-inset-bottom,0px));user-select:text;-webkit-user-select:text}.guide-prompt{font-size:16px;min-height:150px}.guide-links a{min-height:44px}.guide-content #copy-prompt{width:100%}}
